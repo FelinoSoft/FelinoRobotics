@@ -55,7 +55,7 @@ TFileHandle hFileHandleOd;
 long nFileSizeOd = 10000; 			//1 byte each char...
 
 TPosition robot_odometry;       // WE SHOULD ACCESS THIS VARIABLE with a "semaphore".
-TMutex semaphore_odometry = 0;  // Important to initialize to zero!!! Not acquired.
+TMutex semaphore_odometry = 0;  // IMPORTANT to initialize to zero. Not acquired.
 
 float R = 0.026; 								// m
 float L = 0.128; 								// m
@@ -938,6 +938,17 @@ void go(int cellX, int cellY){
 
 task main()
 {
+  /* Prepare for the Race */
+
+  // Start gyroscope calibration
+  HTGYROstartCal(HTGYRO);
+
+  // Start tasks
+  // TODO Set Speed Task
+  // Odometry Task
+  set_position(robot_odometry, p.x, p.y, 0);
+  StartTask(updateOdometry);
+
 		// Calibrate the gyro, make sure you hold the sensor still
 		int x_ini = 1;
 		int y_ini = 1;
@@ -957,9 +968,7 @@ task main()
 		planPath(x_ini, y_ini, x_end, y_end);
 		Pos p;
 		cellToPos(p,0,0);
-		set_position(robot_odometry, p.x, p.y, 0);
 
-		StartTask(updateOdometry);
 
 		Sleep(1000);
 
