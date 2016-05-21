@@ -1,0 +1,157 @@
+//#pragma config(Sensor,  .... )
+//                  PLANTILLA P2
+//  Make the robot move at a certain speed (linear and angular), so it can drive along an 8
+//  Update the robot internal odometry estimation, so it aproximately "knows" where it is all the time
+//
+#include "mutexLib.c"
+#include "positionLib.c"
+
+// ROBOT PARAMETERS
+int R = 0.026; // m
+int L = 0.128; // m
+
+TPosition robot_odometry;       // WE SHOULD ACCESS THIS VARIABLE with a "semaphore".
+TMutex semaphore_odometry = 0;  // Important to initialize to zero!!! Not acquired.
+TFileIOResult nIoResult;
+
+// converts degrees to radians
+float degToRad(float degrees)
+{
+	return (degrees * PI) /180;
+}
+
+// FUNCTION!!
+int setSpeed(float v, float w)
+{
+
+	// start the motors so that the robot gets
+  // v m/s linear speed and w RADIAN/s angular speed
+  float w_l = 1, w_r = 1;
+
+  // parameters of power/speed transfer
+  float mR = ?, mL = ?, nR = 0,	nL = 0;
+  float motorPowerRight, motorPowerLeft;
+
+	// calculates speed for both wheels
+  w_d = (L * w + 2 * v)/(2*R);
+ 	w_l = (2*v - R*wd)/R;
+
+  // sets the power for both motors
+  motorPowerLeft = mL * w_l + nL;
+  motorPowerRight = mR * w_d + nR;
+
+  // checks if calculated power exceeds the motors capacity
+  if (motorPowerLeft <= 100 && motorPowerRight <= 100) {
+  	motor[motorA] = motorPowerLeft;
+  	motor[motorC] = motorPowerRight;
+  	return 1;
+	}
+	else {
+
+		// too much water
+		return 0;
+	}
+
+}
+
+// TASK TO BE LAUNCHED SIMULTANEOUSLY to "main"!!
+task updateOdometry(){
+  int cycle = 1; // we want to update odometry every 1 s
+  float dSl,dSr,dx,dy,dT;
+  float x, y, th;
+
+  while (true){
+
+    float timeAux = nPgmTime;
+    float timeAux2;
+
+		// read tachometers, and estimate how many m. each wheel has moved since last update
+    // RESET tachometer right after to start including the "moved" degrees turned in next iteration
+
+    // HAY QUE BLOQUEAR LA CPU; DONT KNOW HOW THOUGH D:
+    dSl = nMotorEncoder[motorA];
+    dSr = nMotorEncoder[motorC];
+    nMotorEncoder[motorA] = 0;
+    nMotorEncoder[motorC] = 0;
+    // FIN DE BLOQUEO DE LA CPU SEA COMO SEA QUE SE HACE ESO D:
+
+    // calculates odometry
+    dSl = R * degToRad(dSl);
+    dSr = R * degToRad(dSr);
+
+    dS = (dSr + dSl) / 2;
+		dT = (dSr - dSl) / L;
+		dx = ds * cos(robot_odometry.th + (dT/2));
+		dy = ds * sin(robot_odometry.th + (dT/2));
+
+		x = robot_odometry.x + dx;
+		y = robot_odometry.y + dy;
+		th = robot_odometry.th + dT;
+
+		// updates odometry
+		AcquireMutex(semaphore_odometry);
+		robot_odometry.x = x;
+		robot_odometry.y = y;
+		robot_odometry.th = th;
+		ReleaseMutex(semaphore_odometry);
+
+   	// show each step on screen and write in a file
+		nxtDisplayTextLine(2, "ODOMETRY NEW VALUE");
+  	nxtDisplayTextLine(3, "x,y: %2.2f %2.2f", robot_odometry.x,robot_odometry.y);
+  	nxtDisplayTextLine(4, "theta: %2.2f ", robot_odometry.th);
+
+  	// saves odometry in a file
+  	CloseAllHandles(nIoResult);
+  	PlaySoundFile("Woops.rso");
+  	hFileHandle = 0;
+    OpenWrite(hFileHandle, nIoResult, sFileName, nFileSize);
+    string lol;
+    StringFormat(lol, "(%2.2f, %2.2f, %2.2f)\n", x, y, th);
+    WriteText(hFileHandle, nIoResult, lol);
+
+
+	 	// Wait until cycle is completed
+   	timeAux2 = nPgmTime;
+   	if ((timeAux2 - timeAux) < (cycle * 1000)) {
+   		Sleep( (cycle * 1000) - (timeAux2 - timeAux) );
+   	}
+	}
+}
+
+//the program below uses feedback from encoders to determine how much the robot turns.
+task main()
+{
+
+  float v,w; //speeds
+  int radio; //Trajectory R
+  int circunf; // L (semi-dist. between robot wheels)
+
+  // config.
+
+
+  // reset odometry values and motor encoders.
+
+
+
+
+
+  StartTask(updateOdometry);
+
+  // turn 90 degrees on the robot
+
+
+  // generate 1st part of trayectory
+
+
+
+  // generate 2nd part of trayectory
+
+
+
+  // generate 3rd part of trayectory
+
+
+
+  // generate 4th part of trayectory
+
+}

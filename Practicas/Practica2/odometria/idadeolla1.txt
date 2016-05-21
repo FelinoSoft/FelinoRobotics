@@ -1,0 +1,3 @@
+26 en x
+5 en y
+10 en th
