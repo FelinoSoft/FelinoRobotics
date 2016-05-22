@@ -25,7 +25,7 @@ float R = 0.026; 			// m
 float L = 0.128; 			// m
 
 // Sets speed variables for automatic adjustement
-int setSpeed(float oV, float oW, float iV, float iW)
+void setSpeed(float oV, float oW, float iV, float iW)
 {
   AcquireMutex(access_speed);
   objV = oV;
@@ -73,7 +73,6 @@ int setSpeedBase(float v, float w)
     return 0;
   }
 }
-
 
 // Takes control of the speed
 task controlSpeed()
@@ -131,7 +130,7 @@ task controlSpeed()
       }
     } else{
       // V speed doesn't need adjustement
-      finalV = _curV
+      finalV = _curV;
     }
 
     // Manage W speed
@@ -160,11 +159,11 @@ task controlSpeed()
       }
     } else{
       // W speed doesn't need adjustement
-      finalW = _curW
+      finalW = _curW;
     }
 
     // Adjust speed
-    setSpeed(finalV, finalW);
+    setSpeedBase(finalV, finalW);
 
     // Set current speed with semaphore
     AcquireMutex(access_speed);
