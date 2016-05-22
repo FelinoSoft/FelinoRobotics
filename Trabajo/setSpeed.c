@@ -8,6 +8,7 @@
 
 // Include other libraries
 #include "mutexLib.c"
+#include "commonAux.c"
 
 // Semaphore for accesing speed variables
 TMutex access_speed = 0;  // Important to initialize to zero!!! Not acquired.
@@ -19,10 +20,6 @@ float curV = 0;   // Current V speed
 float curW = 0;   // Current W speed
 float incV = 0;  // Value for modifying the current V speed
 float incW = 0;  // Value for modifying the current W speed
-
-// Robot parameters
-float R = 0.026; 			// m
-float L = 0.128; 			// m
 
 // Sets speed variables for automatic adjustement
 void setSpeed(float oV, float oW, float iV, float iW)
