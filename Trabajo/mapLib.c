@@ -5,6 +5,9 @@
 #include "positionLib.c"
 #include "common.h"
 #include "hitechnic-gyro.h"
+#include "commonAux.c"
+#include "odometry.c"
+#include "setSpeed.c"
 
 TFileIOResult nIoResult;
 TFileHandle hFileHandle;
@@ -47,187 +50,6 @@ typedef struct
 	short x;
 	short y;
 } Cell;
-
-
-// Odometry file
-TFileIOResult nIoResultOd;
-TFileHandle hFileHandleOd;
-long nFileSizeOd = 10000; 			//1 byte each char...
-
-TPosition robot_odometry;       // WE SHOULD ACCESS THIS VARIABLE with a "semaphore".
-TMutex semaphore_odometry = 0;  // Important to initialize to zero!!! Not acquired.
-
-float R = 0.026; 								// m
-float L = 0.128; 								// m
-
-
-// Converts degrees to radians
-float degToRad(float degrees)
-{
-    return (degrees * (PI)) /180;
-}
-
-float radToDeg(float rads)
-{
-		return ((rads * 180)) / (PI);
-}
-
-// Normalizes theta [-pi,pi]
-float normTheta(float theta)
-{
-    while (theta < 0) {
-        theta = 2*(PI) + theta;
-    }
-
-    while (theta >= (2*(PI))){
-        theta = theta - 2*(PI);
-    }
-
-    if (theta > (PI)) {
-        theta = theta - (2*(PI));
-    }
-
-    return theta;
-}
-
-// Updates the odometry
-task updateOdometry(){
-
-  float cycle = 0.01; 										// we want to update odometry every 0.01 s
-  int step = 20;            							// we want to write odometry data each 20 steps
-  float dSl,dSr,dS,dx,dy,dT;
-  float x, y, th;
-  string odometryString = "";
-  strcat(odometryString, "odometry = ["); // concatenate string2 into string1
-
-  string sFileName = "odometrylog.txt";
-  CloseAllHandles(nIoResultOd);
-  //
-  // Deletes the file if it already exists
-  //
-  Delete(sFileName, nIoResultOd);
-  hFileHandleOd = 0;
-  OpenWrite(hFileHandleOd, nIoResultOd, sFileName, nFileSizeOd);
-  WriteText(hFileHandleOd, nIoResultOd, odometryString);
-  float timeAux = 0;
-  float timeAux2;
-  float timeAuxOld = 0;
-  float mseconds;
-  float rotSpeed;
-	//errorGyro = normTheta( degToRad(errorGyro) * (-1) );
-
-  while (true){
-    // show each step on screen and write in the string
-		timeAuxOld = timeAux;
-    timeAux = nPgmTime;
-    mseconds = (timeAux - timeAuxOld);
-
-    // GIROSCOPO
-    // Reads gyro value
-    rotSpeed = HTGYROreadRot(HTGYRO);
-    if(abs(rotSpeed) <= 4){
-    		rotSpeed = 0;
-  	}
-  	else {
-  		rotSpeed = rotSpeed - 0.78;
-  	}
-
-    rotSpeed = normTheta( degToRad(rotSpeed) * (-1) );
-    dT = rotSpeed * (mseconds / 1000);
-
-    timeAux2 = 0;
-
-    // read tachometers, and estimate how many m. each wheel has moved since last update
-    // RESET tachometer right after to start including the "moved" degrees turned in next iteration
-    // locks the cpu to modify the motors power
-    // CPU LOCKED
-    hogCPU();
-    dSl = nMotorEncoder[motorA];
-    dSr = nMotorEncoder[motorC];
-    nMotorEncoder[motorA] = 0;
-    nMotorEncoder[motorC] = 0;
-    releaseCPU();
-    // CPU RELEASED
-
-  	dSl = R * degToRad(dSl);
-    dSr = R * degToRad(dSr);
-    dS = (dSr + dSl) / 2;
-
-		dx = dS * cos(robot_odometry.th + (dT/2));
-	  dy = dS * sin(robot_odometry.th + (dT/2));
-
-    x = robot_odometry.x + dx;
-    y = robot_odometry.y + dy;
-    th = normTheta(robot_odometry.th + dT);
-
-    // Updates odometry
-    AcquireMutex(semaphore_odometry);
-    set_position(robot_odometry, x, y, th);
-    ReleaseMutex(semaphore_odometry);
-
-    // Write final string into file
-    if(step==20){
-        step = 0;
-        string temp, temp2;
-        StringFormat(temp, "%.2f, %.2f,", x, y);
-        StringFormat(temp2, "%.2f; \n", th);
-        strcat(temp,temp2);
-    		WriteText(hFileHandleOd, nIoResultOd, temp);
-    }
-    step++;
-
-    // Wait until cycle is completed
-    timeAux2 = nPgmTime;
-    if ((timeAux2 - timeAux) < (cycle * 1000)) {
-        Sleep( (cycle * 1000) - (timeAux2 - timeAux) );
-    }
-  }
-}
-
-// Sets speed to motors
-int setSpeed(float v, float w)
-{
-
-  // start the motors so that the robot gets
-  // v m/s linear speed and w RADIAN/s angular speed
-    float w_r = (L * w + 2 * v)/(2*R);
-    float w_l = (2*v - R*w_r)/R;
-
-  // parameters of power/speed transfer
-  float mR = 5.5058, mL = 5.5092, nR = 1.4976,  nL = 1.8269;
-  //float mR = 5.80117, mL = 5.76965, nR = -0.20796,    nL = 0.138482;
-  float motorPowerRight, motorPowerLeft;
-
-  // sets the power for both motors
-  if(v == 0 && w == 0){
-  		motorPowerLeft = 0;
- 			motorPowerRight = 0;
-	} else{
-			motorPowerLeft = mL * w_l + nL;
-  		motorPowerRight = mR * w_r + nR + 1.15;
-	}
-
-
-  // checks if calculated power exceeds the motors capacity
-  if (motorPowerLeft <= 80 && motorPowerRight <= 80) {
-    hogCPU();
-    motor[motorA] = motorPowerLeft;
-    motor[motorC] = motorPowerRight;
-    releaseCPU();
-    return 1;
-    }
-    else {
-
-        // too much power, sets the power to the maximum possible
-        hogCPU();
-    motor[motorA] = 80;
-    motor[motorC] = 80;
-    releaseCPU();
-        return 0;
-    }
-
-}
-
 
 void initConnections(){
      for(int i=0; i<2*MAX_X+1; ++i){
@@ -344,10 +166,6 @@ bool readLineHeader(TFileHandle hFileHandle,TFileIOResult nIoResult, int & dimX,
 
      return endfile;
 	}
-
-
-
-
 
 bool readNextLine(TFileHandle hFileHandle,TFileIOResult & nIoResult, int & mapRow)
 {
@@ -710,10 +528,6 @@ void posToCell(Cell cell, float posX, float posY){
 	cell.y = posY/0.4;
 }
 
-float euclideanDistance(float x1, float x2, float y1, float y2){
-    return sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
-}
-
 // DetectObstacle
 bool detectObstacle(int posx, int posy){
 	// Epic
@@ -770,7 +584,7 @@ void go(int cellX, int cellY){
 			AcquireMutex(semaphore_odometry);
       theta = robot_odometry.th;
       ReleaseMutex(semaphore_odometry);
-      setSpeed(v,w);
+      setSpeedBase(v,w);
 		}
 		ygriega = true;
 	}
@@ -795,7 +609,7 @@ void go(int cellX, int cellY){
 			AcquireMutex(semaphore_odometry);
       theta = robot_odometry.th;
       ReleaseMutex(semaphore_odometry);
-      setSpeed(v,w);
+      setSpeedBase(v,w);
 		}
 
 	}
@@ -820,7 +634,7 @@ void go(int cellX, int cellY){
 			AcquireMutex(semaphore_odometry);
       theta = robot_odometry.th;
       ReleaseMutex(semaphore_odometry);
-      setSpeed(v,w);
+      setSpeedBase(v,w);
 		}
 		ygriega = true;
 	}
@@ -853,7 +667,7 @@ void go(int cellX, int cellY){
       if(theta < 0){
 	    	fixTheta += 2*PI;
 	    }
-      setSpeed(v,w);
+      setSpeedBase(v,w);
 		}
 
 	}
@@ -924,7 +738,7 @@ void go(int cellX, int cellY){
 			//float w = (thetaFinal - theta)*10;
 			//w = w - 0.9;
 			nxtDisplayTextLine(5, "w: %.2f", w);
-			setSpeed(0.1,w);
+			setSpeedBase(0.1,w);
       if(ygriega){
 				posX = p.x;
 			} else{
@@ -932,58 +746,6 @@ void go(int cellX, int cellY){
 			}
   }
   if(obstacleDetected){
-  	setSpeed(0,0);
+  	setSpeedBase(0,0);
   }
-}
-
-task main()
-{
-		// Calibrate the gyro, make sure you hold the sensor still
-		int x_ini = 1;
-		int y_ini = 1;
-		int x_end = 15;
-		int y_end = 1;
-
-		// Inicializa la malla
-		string map_file = "mapa3.txt";
-		initConnections();
-
-		if(	loadMap(map_file) ){
-		  nxtDisplayTextLine(6, "Mapa loaded ok");
-		}else{
-		  nxtDisplayTextLine(6, "Mapa NOT loaded");
-		}
-		HTGYROstartCal(HTGYRO);
-		planPath(x_ini, y_ini, x_end, y_end);
-		Pos p;
-		cellToPos(p,0,0);
-		set_position(robot_odometry, p.x, p.y, 0);
-
-		StartTask(updateOdometry);
-
-		Sleep(1000);
-
-		for(iLoop = 1; iLoop < sizePath; iLoop++){
-			go(pathX[iLoop],pathY[iLoop]);
-
-			// Check if hay obstaculo
-			if(detectObstacle(pathX[iLoop-1], pathY[iLoop-1])){
-				// WTF
-				PlaySoundFile("WTF.rso");
-
-				// Okay, vamo a calmarno, voy a eliminar conexion
-				deleteConnection(pathX[iLoop-1], pathY[iLoop-1],facingDirection);
-
-				// Ahora replanifico turkey
-				planPath(2*pathX[iLoop-1]+1, 2*pathY[iLoop-1]+1, x_end, y_end);
-
-				PlaySoundFile("wilhelmA.rso");
-
-				// Reiniciar bucle
-				iLoop = 0;
-			}
-		}
-		StopTask(updateOdometry);
- 		Close(hFileHandleOd, nIoResultOd);
-		nxtDisplayTextLine(5, "FIN");
 }
