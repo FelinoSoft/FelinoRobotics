@@ -1,3 +1,6 @@
+#include "commonAux.c"
+#include "setSpeed.c"
+
 void doHalfEightRight()
 {
   // Destination variables
@@ -8,7 +11,7 @@ void doHalfEightRight()
 	// turn 90 degrees on the robot
   float v = 0;
 	float w = 1;
-	setSpeed(v,-w);
+	setSpeedBase(v,-w);
 
 	// condicion de parada
 	theta = (PI)/2;
@@ -27,7 +30,7 @@ void doHalfEightRight()
   // generate 1st part of trayectory
 	v = 0.2;
   w = 0.5;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	xFinal = 0;
 	yFinal = 0.8;
@@ -45,7 +48,7 @@ void doHalfEightRight()
 	PlaySoundFile("Woops.rso");
 
   // generate 2nd part of trayectory
-	setSpeed(v,-w);
+	setSpeedBase(v,-w);
 
 	xFinal = 0;
 	yFinal = 1.6;
@@ -63,12 +66,12 @@ void doHalfEightRight()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = 1;
+  v = 0;
+	w = 1;
 	// condicion de parada
 	theta = 0;
 	thetaFinal = (PI)/2;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  	nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -78,7 +81,7 @@ void doHalfEightRight()
 		theta = robot_odometry.th;
 		ReleaseMutex(semaphore_odometry);
 	}
-	PlaySoundFile("Woops.rso");  	
+	PlaySoundFile("Woops.rso");
 }
 
 void doHalfEightLeft()
@@ -89,9 +92,9 @@ void doHalfEightLeft()
 	float errorDist = 0.005;
 
 	// turn 90 degrees on the robot
-  	float v = 0;
+  float v = 0;
 	float w = 1;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	// condicion de parada
 	theta = (PI)/2;
@@ -110,7 +113,7 @@ void doHalfEightLeft()
   	// generate 1st part of trayectory
 	v = 0.2;
   	w = 0.5;
-	setSpeed(v,-w);
+	setSpeedBase(v,-w);
 
 	xFinal = 0;
 	yFinal = 0.8;
@@ -132,7 +135,7 @@ void doHalfEightLeft()
 	xFinal = 0;
 	yFinal = 1.6;
 	thetaFinal = (PI);
-	setSpeed(v,-w);
+	setSpeedBase(v,-w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist &&
 				 abs(theta - thetaFinal) > errorTheta) {
 	  nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
@@ -145,13 +148,13 @@ void doHalfEightLeft()
 	}
 	PlaySoundFile("Woops.rso");
 
-  	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = -1;
+  // turn 90 degrees on the robot
+  v = 0;
+	w = -1;
 	// condicion de parada
 	theta = (PI)/2;
 	thetaFinal = 0;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  	nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -176,7 +179,7 @@ void doHalfEightStraightRight()
 	float w = -1;
 	theta = (PI)/2;
 	thetaFinal = 0;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	// condicion de parada
 	while(abs(theta - thetaFinal) > errorTheta) {
@@ -196,7 +199,7 @@ void doHalfEightStraightRight()
   	xFinal = 0.4;
 	yFinal = 0;
 	thetaFinal = 0;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist){
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  	nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -209,12 +212,12 @@ void doHalfEightStraightRight()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = 1;
+  v = 0;
+	w = 1;
 	// condicion de parada
 	theta = 0;
 	thetaFinal = (PI)/2;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  	nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -233,7 +236,7 @@ void doHalfEightStraightRight()
   	xFinal = 0.4;
 	yFinal = 0.8;
 	thetaFinal = 0;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist) {
 	  nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -246,12 +249,12 @@ void doHalfEightStraightRight()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = 1;
+  v = 0;
+	w = 1;
 	// condicion de parada
 	theta = (PI)/2;
 	thetaFinal = (PI);
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
@@ -271,7 +274,7 @@ void doHalfEightStraightRight()
   	xFinal = -0.4;
 	yFinal = 0.8;
 	thetaFinal = (PI);
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist) {
 	  nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -284,12 +287,12 @@ void doHalfEightStraightRight()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = -1;
+  v = 0;
+	w = -1;
 	// condicion de parada
 	theta = (PI);
 	thetaFinal = (PI)/2;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
@@ -309,7 +312,7 @@ void doHalfEightStraightRight()
   	xFinal = -0.4;
 	yFinal = 1.6;
 	thetaFinal = (PI)/2;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist) {
 	  nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -322,12 +325,12 @@ void doHalfEightStraightRight()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = -1;
+  v = 0;
+	w = -1;
 	// condicion de parada
 	theta = (PI)/2;
 	thetaFinal = (0);
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
@@ -347,7 +350,7 @@ void doHalfEightStraightRight()
   	xFinal = 0;
 	yFinal = 1.6;
 	thetaFinal = 0;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist) {
 	  nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -360,12 +363,12 @@ void doHalfEightStraightRight()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = 1;
+  v = 0;
+	w = 1;
 	// condicion de parada
 	theta = (0);
 	thetaFinal = (PI)/2;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
@@ -391,7 +394,7 @@ void doHalfEightStraightLeft()
 	float w = 1;
 	theta = (PI)/2;
 	thetaFinal = (PI);
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	// condicion de parada
 	while(abs(theta - thetaFinal) > errorTheta) {
@@ -411,7 +414,7 @@ void doHalfEightStraightLeft()
   	xFinal = -0.4;
 	yFinal = 0;
 	thetaFinal = (PI);
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist){
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  	nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -424,12 +427,12 @@ void doHalfEightStraightLeft()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = -1;
+  v = 0;
+	w = -1;
 	// condicion de parada
 	theta = (PI);
 	thetaFinal = (PI)/2;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  	nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -448,7 +451,7 @@ void doHalfEightStraightLeft()
   	xFinal = -0.4;
 	yFinal = 0.8;
 	thetaFinal = 0;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist) {
 	  nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -461,12 +464,12 @@ void doHalfEightStraightLeft()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = -1;
+  v = 0;
+	w = -1;
 	// condicion de parada
 	theta = (PI)/2;
 	thetaFinal = 0;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
@@ -486,7 +489,7 @@ void doHalfEightStraightLeft()
   	xFinal = 0.4;
 	yFinal = 0.8;
 	thetaFinal = 0;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist) {
 	  nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -499,12 +502,12 @@ void doHalfEightStraightLeft()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = 1;
+  v = 0;
+	w = 1;
 	// condicion de parada
 	theta = 0;
 	thetaFinal = (PI)/2;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
@@ -524,7 +527,7 @@ void doHalfEightStraightLeft()
   	xFinal = 0.4;
 	yFinal = 1.6;
 	thetaFinal = (PI)/2;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist) {
 	  nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -537,12 +540,12 @@ void doHalfEightStraightLeft()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = 1;
+  v = 0;
+	w = 1;
 	// condicion de parada
 	theta = (PI)/2;
 	thetaFinal = (PI);
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
@@ -562,7 +565,7 @@ void doHalfEightStraightLeft()
   	xFinal = 0;
 	yFinal = 1.6;
 	thetaFinal = (PI);
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist) {
 	  nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));
@@ -575,12 +578,12 @@ void doHalfEightStraightLeft()
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot
-  	float v = 0;
-	float w = -1;
+  v = 0;
+	w = -1;
 	// condicion de parada
 	theta = (PI);
 	thetaFinal = (PI)/2;
-	setSpeed(v,w);
+	setSpeedBase(v,w);
 
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
@@ -593,4 +596,3 @@ void doHalfEightStraightLeft()
 	}
 	PlaySoundFile("Woops.rso");
 }
-

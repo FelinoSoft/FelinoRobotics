@@ -15,7 +15,6 @@ void set_position(TPosition &pos, float x, float y, float th)
   pos.x=x;
   pos.y=y;
   pos.th=th;
-
 }
 
 void normalizeAngle(float & angle){
