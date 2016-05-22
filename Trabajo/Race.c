@@ -5,6 +5,7 @@
 #include "positionLib.c"
 #include "common.h"
 #include "hitechnic-gyro.h"
+#include "setSpeed.c"
 
 TFileIOResult nIoResult;
 TFileHandle hFileHandle;
@@ -56,9 +57,6 @@ long nFileSizeOd = 10000; 			//1 byte each char...
 
 TPosition robot_odometry;       // WE SHOULD ACCESS THIS VARIABLE with a "semaphore".
 TMutex semaphore_odometry = 0;  // IMPORTANT to initialize to zero. Not acquired.
-
-float R = 0.026; 								// m
-float L = 0.128; 								// m
 
 
 // Converts degrees to radians
@@ -946,8 +944,9 @@ task main()
   // Start tasks
   // TODO Set Speed Task
   // Odometry Task
-  set_position(robot_odometry, p.x, p.y, 0);
+  //set_position(robot_odometry, p.x, p.y, 0);
   StartTask(updateOdometry);
+  StartTask(controlSpeed);
 
 		// Calibrate the gyro, make sure you hold the sensor still
 		int x_ini = 1;
