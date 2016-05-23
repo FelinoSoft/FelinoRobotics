@@ -6,10 +6,6 @@
  *  You can also call to classic setSpeedBase for manual speedControl
  */
 
-// Include other libraries
-#include "mutexLib.c"
-#include "commonAux.c"
-
 // Semaphore for accesing speed variables
 TMutex access_speed = 0;  // Important to initialize to zero!!! Not acquired.
 
@@ -54,6 +50,12 @@ int setSpeedBase(float v, float w)
   		motorPowerRight = mR * w_r + nR + 1.15;
 	}
 
+	// Set current speed with semaphore
+    AcquireMutex(access_speed);
+    curV = v;
+    curW = w;
+    ReleaseMutex(access_speed);
+
   // Checks if calculated power exceeds the motors capacity
   if (motorPowerLeft <= 80 && motorPowerRight <= 80) {
     hogCPU();
@@ -75,7 +77,7 @@ int setSpeedBase(float v, float w)
 task controlSpeed()
 {
   // Cycle variables
-  float cycle = 0.1; 			// We want to apply speed changes every 0.1 s
+  float cycle = 0.01; 			// We want to apply speed changes every 0.1 s
   float timeAux;
   float timeAux2;
   float finalV;
@@ -119,11 +121,6 @@ task controlSpeed()
 
         // Incremental change
         finalV = _curV + finalIncV;
-
-        // Check if we have reached the objV
-        if(finalV > _objV){
-          finalV = _objV;
-        }
       }
     } else{
       // V speed doesn't need adjustement
@@ -148,11 +145,7 @@ task controlSpeed()
 
         // Incremental change
         finalW = _curW + finalIncW;
-
-        // Check if we have reached the objW
-        if(finalW > _objW){
-          finalW = _objW;
-        }
+        nxtDisplayTextLine(2, "%2.2f", finalW);
       }
     } else{
       // W speed doesn't need adjustement
@@ -161,12 +154,6 @@ task controlSpeed()
 
     // Adjust speed
     setSpeedBase(finalV, finalW);
-
-    // Set current speed with semaphore
-    AcquireMutex(access_speed);
-    curV = finalV;
-    curW = finalW;
-    ReleaseMutex(access_speed);
 
     // Wait until cycle is completed
     timeAux2 = nPgmTime;

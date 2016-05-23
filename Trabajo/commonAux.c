@@ -5,10 +5,6 @@
  *  It does also contain auxiliary common functions
  */
 
-#pragma systemFile
-#include "positionLib.c"
-#include "mutexLib.c"
-
 /* Common variables */
 // Robot parameters
 float R = 0.026; 			// m

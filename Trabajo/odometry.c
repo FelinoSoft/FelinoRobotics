@@ -4,9 +4,6 @@
  *  Manages odometry of the robot
  */
 
-#include "hitechnic-gyro.h"
-#include "common.h"
-#include "commonAux.c"
 
 // Odometry file
 TFileIOResult nIoResultOd;
