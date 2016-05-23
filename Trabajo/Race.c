@@ -10,25 +10,39 @@
 #include "odometry.c"
 #include "mapLib.c"
 #include "part1.c"
+#include "part2.c"
 
+bool planPathOnTheRoad = false;
 
 task main()
 {
   /* Prepare for the Race */
+
+  // Check which labyrinth we have
+  // TODO
+
   // Start gyroscope calibration
   HTGYROstartCal(HTGYRO);
 
-  // Start tasks
-  // TODO Set Speed Task
+  /* Start tasks */
+
+  // Set speed task
+  StartTask(controlSpeed);
   // Odometry Task
   //set_position(robot_odometry, p.x, p.y, (PI)/2);
-
   StartTask(updateOdometry);
-  StartTask(controlSpeed);
+
+  // Plan path on the road task
+  if(planPathOnTheRoad) {
+  	StartTask(planPathOnTheRoadTask);
+  }
 
   // do the things it has to do
  	doHalfEightRight();
   //doHalfEightStraightRight();
+
+ 	// Solve the labyrinth
+ 	solveLabyrinth('A');
 
   StopTask(controlSpeed);
   StopTask(updateOdometry);
