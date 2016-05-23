@@ -10,7 +10,7 @@
 #define X_END_B -1
 #define Y_END_B -1
 
-void solveLabyrinth(char type)
+void solveLabyrinth(bool type)
 {
 	// Common variables
 	int x_ini;
@@ -20,7 +20,7 @@ void solveLabyrinth(char type)
 	string map_file;
 
 	// Check type of labyrinth
-	if(type == 'B'){
+	if(type){
 		// Labyrinth B
 		x_ini = X_START_B;
 		y_ini = Y_START_B;
