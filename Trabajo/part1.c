@@ -1,6 +1,13 @@
 #include "commonAux.c"
 #include "setSpeed.c"
 
+/*
+void doHalfEightRight();
+void doHalfEightLeft();
+void doHalfEightStraightRight();
+void doHalfEightStraightLeft();
+*/
+
 void doHalfEightRight()
 {
   // Destination variables
@@ -30,7 +37,8 @@ void doHalfEightRight()
   // generate 1st part of trayectory
 	v = 0.2;
   w = 0.5;
-	setSpeedBase(v,w);
+	//setSpeedBase(v,w);
+  setSpeed(v,w,v/10,w/10);
 
 	xFinal = 0;
 	yFinal = 0.8;
@@ -48,7 +56,8 @@ void doHalfEightRight()
 	PlaySoundFile("Woops.rso");
 
   // generate 2nd part of trayectory
-	setSpeedBase(v,-w);
+	//setSpeedBase(v,-w);
+	setSpeed(v,-w,v/10,w/10);
 
 	xFinal = 0;
 	yFinal = 1.6;
@@ -71,7 +80,8 @@ void doHalfEightRight()
 	// condicion de parada
 	theta = 0;
 	thetaFinal = (PI)/2;
-	setSpeedBase(v,w);
+	//setSpeedBase(v,w);
+	setSpeed(v,w,v/10,w/10);
 	while(abs(theta - thetaFinal) > errorTheta) {
 		nxtDisplayTextLine(3, "dist %2.2f", euclideanDistance(x,xFinal,y,yFinal));
 	  	nxtDisplayTextLine(4, "Theta: %2.2f", abs(theta - thetaFinal));

@@ -9,65 +9,74 @@
 #include "setSpeed.c"
 #include "odometry.c"
 #include "mapLib.c"
+#include "part1.c"
+
 
 task main()
 {
   /* Prepare for the Race */
-
   // Start gyroscope calibration
   HTGYROstartCal(HTGYRO);
 
   // Start tasks
   // TODO Set Speed Task
   // Odometry Task
-  //set_position(robot_odometry, p.x, p.y, 0);
+  //set_position(robot_odometry, p.x, p.y, (PI)/2);
+
   StartTask(updateOdometry);
   StartTask(controlSpeed);
 
-		// Calibrate the gyro, make sure you hold the sensor still
-		int x_ini = 1;
-		int y_ini = 1;
-		int x_end = 15;
-		int y_end = 1;
+  // do the things it has to do
+ 	doHalfEightRight();
+  //doHalfEightStraightRight();
 
-		// Inicializa la malla
-		string map_file = "mapa3.txt";
-		initConnections();
+  StopTask(controlSpeed);
+  StopTask(updateOdometry);
+	Close(hFileHandleOd, nIoResultOd);
+	nxtDisplayTextLine(5, "FIN");
 
-		if(	loadMap(map_file) ){
-		  nxtDisplayTextLine(6, "Mapa loaded ok");
-		}else{
-		  nxtDisplayTextLine(6, "Mapa NOT loaded");
+  /*
+	// Calibrate the gyro, make sure you hold the sensor still
+	int x_ini = 1;
+	int y_ini = 1;
+	int x_end = 15;
+	int y_end = 1;
+
+	// Inicializa la malla
+	string map_file = "mapa3.txt";
+	initConnections();
+
+	if(	loadMap(map_file) ){
+	  nxtDisplayTextLine(6, "Mapa loaded ok");
+	}else{
+	  nxtDisplayTextLine(6, "Mapa NOT loaded");
+	}
+	HTGYROstartCal(HTGYRO);
+	planPath(x_ini, y_ini, x_end, y_end);
+	Pos p;
+	cellToPos(p,0,0);
+
+	Sleep(1000);
+
+	for(iLoop = 1; iLoop < sizePath; iLoop++){
+		go(pathX[iLoop],pathY[iLoop]);
+
+		// Check if hay obstaculo
+		if(detectObstacle(pathX[iLoop-1], pathY[iLoop-1])){
+			// WTF
+			PlaySoundFile("WTF.rso");
+
+			// Okay, vamo a calmarno, voy a eliminar conexion
+			deleteConnection(pathX[iLoop-1], pathY[iLoop-1],facingDirection);
+
+			// Ahora replanifico turkey
+			planPath(2*pathX[iLoop-1]+1, 2*pathY[iLoop-1]+1, x_end, y_end);
+
+			PlaySoundFile("wilhelmA.rso");
+
+			// Reiniciar bucle
+			iLoop = 0;
 		}
-		HTGYROstartCal(HTGYRO);
-		planPath(x_ini, y_ini, x_end, y_end);
-		Pos p;
-		cellToPos(p,0,0);
-
-
-		Sleep(1000);
-
-		for(iLoop = 1; iLoop < sizePath; iLoop++){
-			go(pathX[iLoop],pathY[iLoop]);
-
-			// Check if hay obstaculo
-			if(detectObstacle(pathX[iLoop-1], pathY[iLoop-1])){
-				// WTF
-				PlaySoundFile("WTF.rso");
-
-				// Okay, vamo a calmarno, voy a eliminar conexion
-				deleteConnection(pathX[iLoop-1], pathY[iLoop-1],facingDirection);
-
-				// Ahora replanifico turkey
-				planPath(2*pathX[iLoop-1]+1, 2*pathY[iLoop-1]+1, x_end, y_end);
-
-				PlaySoundFile("wilhelmA.rso");
-
-				// Reiniciar bucle
-				iLoop = 0;
-			}
-		}
-		StopTask(updateOdometry);
- 		Close(hFileHandleOd, nIoResultOd);
-		nxtDisplayTextLine(5, "FIN");
+	}
+	*/
 }
