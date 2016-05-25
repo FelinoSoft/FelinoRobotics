@@ -26,6 +26,7 @@ void setSpeed(float oV, float oW, float iV, float iW)
   incV = iV;
   incW = iW;
   ReleaseMutex(access_speed);
+  wait1Msec(1); // To force timeslice to end and give other threads time
 }
 
 // Sets speed to motors
@@ -77,7 +78,7 @@ int setSpeedBase(float v, float w)
 task controlSpeed()
 {
   // Cycle variables
-  float cycle = 0.01; 			// We want to apply speed changes every 0.1 s
+  float cycle = 0.01; 			// We want to apply speed changes every 0.01 s
   float timeAux;
   float timeAux2;
   float finalV;
@@ -85,7 +86,7 @@ task controlSpeed()
   float finalIncV;
   float finalIncW;
   // Copy of speed variables accessed through semaphore
-  float _objV, _curV, _incV, _objW, _curW, _incW;
+  float _objV, _curV, _incV, _objW, _curW, _incW = 0;
 
   // Main loop
   while (true){

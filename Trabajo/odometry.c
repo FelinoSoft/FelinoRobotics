@@ -21,12 +21,12 @@ task updateOdometry(){
   strcat(odometryString, "odometry = ["); // concatenate string2 into string1
 
   string sFileName = "odometrylog.txt";
-  CloseAllHandles(nIoResultOd);
+  hFileHandleOd = 5;
+  Close(hFileHandleOd, nIoResultOd);
   //
   // Deletes the file if it already exists
   //
   Delete(sFileName, nIoResultOd);
-  hFileHandleOd = 0;
   OpenWrite(hFileHandleOd, nIoResultOd, sFileName, nFileSizeOd);
   WriteText(hFileHandleOd, nIoResultOd, odometryString);
   float timeAux = 0;
