@@ -7,9 +7,68 @@
 #define X_END_B 7
 #define Y_END_B 7
 
-bool B = false;	// By default, labyrinth A
 bool planned = false;
 bool camStarted = false;
+bool doRecalibration = true;
+bool doDrawing = true;
+bool thetaRecalibrated = false;
+
+float get5SonarValues()
+{
+	float value = SensorValue[sonarSensorFrontal];
+	value = value + SensorValue[sonarSensorFrontal];
+	value = value + SensorValue[sonarSensorFrontal];
+	value = value + SensorValue[sonarSensorFrontal];
+	value = value + SensorValue[sonarSensorFrontal];
+	return value/5;
+}
+
+task recalTheta()
+{
+	float minValue = get5SonarValues();
+	setSpeed(0, W_ROTACION/2, -1, -1);
+	wait1Msec(10);
+	float medida_actual = get5SonarValues();
+
+	// Girar a la izquierda hasta que la medida actual sea mayor que la previa
+	while(minValue >= medida_actual){
+		minValue = medida_actual;
+		wait1Msec(10);
+		medida_actual = get5SonarValues();
+	}
+	setSpeed(0,0,-1,-1);
+
+	setSpeed(0, -(W_ROTACION/2), -1, -1);
+	wait1Msec(10);
+	medida_actual = get5SonarValues();
+	// Girar a la derecha hasta que la medida actual sea mayor que la previa
+	while(minValue >= medida_actual){
+		minValue = medida_actual;
+		wait1Msec(10);
+		medida_actual = get5SonarValues();
+	}
+	setSpeed(0,0,-1,-1);
+	AcquireMutex(semaphore_odometry);
+  float posX = robot_odometry.x;
+  float posY = robot_odometry.y;
+	float th = robot_odometry.th;
+  ReleaseMutex(semaphore_odometry);
+
+	if(facingDirection == 0){
+		set_position(robot_odometry, posX, posY, (PI/2));
+	} else if(facingDirection == 2){
+		set_position(robot_odometry, posX, posY, 0);
+	} else if(facingDirection == 4){
+		set_position(robot_odometry, posX, posY, -(PI/2));
+	} else if(facingDirection == 6){
+		if(th < 0){
+			set_position(robot_odometry, posX, posY, -(PI));
+		} else {
+			set_position(robot_odometry, posX, posY, PI);
+		}
+	}
+	thetaRecalibrated = true;
+}
 
 void doPlanning()
 {
@@ -45,10 +104,6 @@ void doPlanning()
     float distToOrigin = euclideanDistance(posX, temp1.x, posY, temp1.y);
     float distToDestin = euclideanDistance(posX, temp2.x, posY, temp2.y);
 
-    nxtDisplayTextLine(1, "ORI %d %d", pathX[iLoop - 1], pathY[iLoop - 1]);
-    nxtDisplayTextLine(2, "DES %d %d", pathX[iLoop], pathY[iLoop]);
-    nxtDisplayTextLine(3, "dist %2.2f %2.2f", distToOrigin, distToDestin);
-
 		// If its nearer from iLoop - 1
     if(distToOrigin < distToDestin){
     	// Check wall from iLoop - 1
@@ -78,56 +133,30 @@ void doPlanning()
 				deleteConnection(pathX[index], pathY[index], facingDirection - 1);
 			}
 
+			if(doRecalibration){
+				StartTask(recalTheta);
+			}
+			reDrawMap();
 			// Ahora replanifico turkey
 			planPath((2*pathX[index])+1, (2*pathY[index])+1, x_end, y_end);
 
 			PlaySoundFile("wilhelmA.rso");
 
+			if(doDrawing) {
+				doReDrawMap = true;
+			}
+
+			if(doRecalibration){
+				while(!thetaRecalibrated){
+					// Do nothing
+				}
+				thetaRecalibrated = true;
+			}
+
 			// Reiniciar bucle
 			iLoop = 0;
 		}
 	}
-}
-
-void solveLabyrinth(bool type)
-{
-	// Common variables
-	int x_ini;
-	int y_ini;
-	int x_end;
-	int y_end;
-	string map_file;
-
-	// Check type of labyrinth
-	if(type){
-		// Labyrinth B
-		x_ini = X_START_B;
-		y_ini = Y_START_B;
-		x_end = X_END_B;
-		y_end = Y_END_B;
-		map_file = "mapaB.txt";
-	} else {
-		// Labyrinth A, this is the default one
-		x_ini = X_START_A;
-		y_ini = Y_START_A;
-		x_end = X_END_A;
-		y_end = Y_END_A;
-		map_file = "mapaA.txt";
-	}
-
-	// Inicializa la malla
-	initConnections();
-
-	if(loadMap(map_file)){
-	  nxtDisplayTextLine(6, "Mapa loaded ok");
-	} else {
-	  nxtDisplayTextLine(6, "Mapa NOT loaded");
-	}
-
-	planPath(x_ini, y_ini, x_end, y_end);
-	planned = true;
-
-	doPlanning();
 }
 
 // Takes control of the speed
@@ -156,9 +185,11 @@ task planPathOnTheRoadTask()
 		y_end = Y_END_A;
 		map_file = "mapaA.txt";
 	}
-
 	// Inicializa la malla
 	initConnections();
+	if(alVuelo){
+  	wait1Msec(1);
+  }
 
 	if(loadMap(map_file)){
 	  nxtDisplayTextLine(6, "Mapa loaded ok");
@@ -166,15 +197,15 @@ task planPathOnTheRoadTask()
 	  nxtDisplayTextLine(6, "Mapa NOT loaded");
 	}
 
+	if(alVuelo){
+  	wait1Msec(1);
+  }
 	planPath(x_ini, y_ini, x_end, y_end);
-
+	if(alVuelo){
+  	wait1Msec(1);
+  }
 	planned = true;
 
 	PlaySoundFile("wilhelmA.rso");
-
-	// Initialize the camera
-	NXTCAMinit(cam);
-	camStarted = true;
-
-	PlaySoundFile("WTF.rso");
+	alVuelo = false;
 }

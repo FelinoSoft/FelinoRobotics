@@ -17,18 +17,6 @@ float curW = 0;   // Current W speed
 float incV = 0;  // Value for modifying the current V speed
 float incW = 0;  // Value for modifying the current W speed
 
-// Sets speed variables for automatic adjustement
-void setSpeed(float oV, float oW, float iV, float iW)
-{
-  AcquireMutex(access_speed);
-  objV = oV;
-  objW = oW;
-  incV = iV;
-  incW = iW;
-  ReleaseMutex(access_speed);
-  wait1Msec(1); // To force timeslice to end and give other threads time
-}
-
 // Sets speed to motors
 int setSpeedBase(float v, float w)
 {
@@ -74,7 +62,22 @@ int setSpeedBase(float v, float w)
   }
 }
 
+// Sets speed variables for automatic adjustement
+void setSpeed(float oV, float oW, float iV, float iW)
+{ /*
+  AcquireMutex(access_speed);
+  objV = oV;
+  objW = oW;
+  incV = iV;
+  incW = iW;
+  ReleaseMutex(access_speed);
+  wait1Msec(1); // To force timeslice to end and give other threads time
+  */
+  setSpeedBase(oV, oW);
+}
+
 // Takes control of the speed
+/*
 task controlSpeed()
 {
   // Cycle variables
@@ -146,7 +149,6 @@ task controlSpeed()
 
         // Incremental change
         finalW = _curW + finalIncW;
-        nxtDisplayTextLine(2, "%2.2f", finalW);
       }
     } else{
       // W speed doesn't need adjustement
@@ -163,3 +165,4 @@ task controlSpeed()
     }
   }
 }
+*/

@@ -10,6 +10,9 @@ long nFileSize                   = 5000; //1 byte each char..
 int sizeX;
 int sizeY;
 int sizeCell;
+int pixPerX;
+int pixPerY;
+
 
 
 // DEFINIR EL MAXIMO NUMERO DE CELDAS QUE PODEMOS UTILIZAR
@@ -24,6 +27,9 @@ int sizePath;
 float distanceToDetect = 20;
 int facingDirection = 2;
 int iLoop;
+
+// Variable global de hacer al vuelo
+bool alVuelo = true;
 
 typedef struct
 {
@@ -141,7 +147,7 @@ bool readLineHeader(TFileHandle hFileHandle,TFileIOResult nIoResult, int & dimX,
               endfile=true;
 
             }else{
-              nxtDisplayTextLine(1, "PROBLEM READING map");
+              //nxtDisplayTextLine(1, "PROBLEM READING map");
             }
         }
      }
@@ -196,7 +202,7 @@ bool readNextLine(TFileHandle hFileHandle,TFileIOResult & nIoResult, int & mapRo
                 //indNum++;
               }else{
                 if (onechar=='1'){
-                  nxtDisplayTextLine(3, " %d %d", mapCol,mapRow);
+                  //nxtDisplayTextLine(3, " %d %d", mapCol,mapRow);
                   connectionsMatrix[mapCol][mapRow]=true;
                 }
                 // else { false} // by default is false
@@ -213,7 +219,7 @@ bool readNextLine(TFileHandle hFileHandle,TFileIOResult & nIoResult, int & mapRo
               endfile=true;
 
             }else{
-              nxtDisplayTextLine(1, "PROBLEM READING map");
+              //nxtDisplayTextLine(1, "PROBLEM READING map");
             }
         }
      }
@@ -231,7 +237,7 @@ bool readNextLine(TFileHandle hFileHandle,TFileIOResult & nIoResult, int & mapRo
         numbersRead[indNum]=num;
      }*/
 
-     nxtDisplayTextLine(3, "%s ", linestring);
+     //nxtDisplayTextLine(3, "%s ", linestring);
 
      /*for(int j=2; j<=indNum; ++j){
         setConnection(numbersRead[0], numbersRead[1], numbersRead[j]);
@@ -262,7 +268,7 @@ bool loadMap(string mapFileName)
 
 	   OpenRead(hFileHandle, nIoResult, mapFileName, nFileSize);
 	   if( nIoResult ==0 ){
-	       nxtDisplayTextLine(1, "OPEN OK: %d", nFileSize);
+	       //nxtDisplayTextLine(1, "OPEN OK: %d", nFileSize);
 
 	       //StringFromChars(sToString, FromChars)
          //Converts an array of bytes to a string value.  You MUST end your char array with a char value of zero!
@@ -276,13 +282,16 @@ bool loadMap(string mapFileName)
             eof = readNextLine(hFileHandle,nIoResult, mapRow);
             //eof = readNextCellConnections(hFileHandle,nIoResult);
             //nxtDisplayTextLine(2, "%s", line);
+            if(alVuelo){
+            	wait1Msec(1);
+            }
 	        }
 	        loadingOk=true;
 	        Close(hFileHandle, nIoResult);
      }
      else{
            loadingOk=false;
-           nxtDisplayTextLine(1, "PROBLEM OPENING file");
+           //nxtDisplayTextLine(1, "PROBLEM OPENING file");
      }
 
 	   return loadingOk;
@@ -300,6 +309,9 @@ void pos2cell(float x_mm, float y_mm, int & x_cell, int & y_cell){
 }
 
 void calcWaveFront(Grid g, int x, int y, int value){
+	if(alVuelo){
+  	wait1Msec(1);
+  }
 	if(x >= 0 && y >= 0 && x < 2*sizeX+1 && y < 2*sizeY+1){
 		if(g.grid[x][y] != -1 && (g.grid[x][y] > value || g.grid[x][y] == -2)){
 
@@ -421,6 +433,9 @@ void planPath(int x_ini, int y_ini, int x_end,int y_end){
 		}
 	}
 
+	if(alVuelo){
+  	wait1Msec(1);
+  }
 	grid.grid[x_end][y_end] = 0;
 
 	calcWaveFront(grid,x_end-1,y_end,1);
@@ -428,16 +443,23 @@ void planPath(int x_ini, int y_ini, int x_end,int y_end){
 	calcWaveFront(grid,x_end,y_end-1,1);
 	calcWaveFront(grid,x_end,y_end+1,1);
 
+	if(alVuelo){
+  	wait1Msec(1);
+  }
 	//INICIALIZARRRR FICHERRROOOS
 	string sFileName = "grid.txt";
 	string sFileName2 = "path.txt";
 	hFileHandleGrid = 0;
   Close(hFileHandleGrid, nIoResult);
-
+	if(alVuelo){
+  	wait1Msec(1);
+  }
   // Deletes the file if it already exists
   Delete(sFileName, nIoResult);
   OpenWrite(hFileHandleGrid, nIoResult, sFileName, nFileSize);
-
+	if(alVuelo){
+		wait1Msec(1);
+	}
   // Escribe la matriz resultante del algoritmo NF1 en un fichero
   for(int i = 2*sizeY; i >= 0;i--){
   	for(int j = 0; j < 2*sizeX+1;j++){
@@ -455,6 +477,9 @@ void planPath(int x_ini, int y_ini, int x_end,int y_end){
   	}
 	}
 	Close(hFileHandleGrid, nIoResult);
+	if(alVuelo){
+  	wait1Msec(1);
+  }
 	Delete(sFileName2, nIoResult);
 	hFileHandleGrid = 2;
   OpenWrite(hFileHandleGrid, nIoResult, sFileName2, nFileSize);
@@ -467,7 +492,9 @@ void planPath(int x_ini, int y_ini, int x_end,int y_end){
 		StringFormat(p, "%d, %d\n", pathX[i], pathY[i]);
 		WriteText(hFileHandleGrid,nIoResult,p);
 	}
-
+	if(alVuelo){
+  	wait1Msec(1);
+  }
 	Close(hFileHandleGrid, nIoResult);
 }
 
@@ -487,6 +514,36 @@ bool detectObstacle(int posx, int posy){
 	return SensorValue[sonarSensorFrontal] < distanceToDetect && isConnected(posx,posy,facingDirection);
 }
 
+void drawRobot(float x_mm, float y_mm, float ang_rad){
+  int cellx,celly;
+  int pixX,pixY;
+  float ang_grad;
+  int th;
+
+  pos2cell(x_mm, y_mm, cellx,celly);
+
+  pixX=cellx*pixPerX+pixPerX/2;
+  pixY=celly*pixPerY+pixPerY/2;
+  nxtFillEllipse(pixX-1, pixY+1, pixX+1, pixY-1); //nxtFillEllipse(Left, Top, Right, Bottom);
+
+  //normalizeAngle(ang_rad);
+  ang_grad=radiansToDegrees(ang_rad);
+  if (ang_grad<0){ ang_grad=ang_grad+360;}
+  th=(ang_grad+22.5)/45;
+  while(th>7){th=th-8;}
+
+	//paint orientation
+	if(th==0)		    { nxtDrawLine(pixX,pixY,pixX+2,pixY);		}
+	else if(th==1)	{ nxtDrawLine(pixX,pixY,pixX+2,pixY+2);	}
+	else if(th==2)	{ nxtDrawLine(pixX,pixY,pixX,pixY+2);	  }
+	else if(th==3)	{ nxtDrawLine(pixX,pixY,pixX-2,pixY+2);	}
+	else if(th==4)	{ nxtDrawLine(pixX,pixY,pixX-2,pixY);		}
+	else if(th==5)	{ nxtDrawLine(pixX,pixY,pixX-2,pixY-2);	}
+	else if(th==6)	{ nxtDrawLine(pixX,pixY,pixX,pixY-2);		}
+	else if(th==7)	{ nxtDrawLine(pixX,pixY,pixX+2,pixY-2);	}
+}
+
+
 // go from CURRENT position (odometry) to middle of cell (cellX, cellY)
 void go(int cellX, int cellY){
 
@@ -496,12 +553,10 @@ void go(int cellX, int cellY){
   float posY = robot_odometry.y;
   float theta = robot_odometry.th;
   ReleaseMutex(semaphore_odometry);
-
+	drawRobot(posX * 1000, posY * 1000, theta);
   // obtains the cell where the robot is
   Cell cell;
   posToCell(cell, posX, posY);
-  nxtDisplayTextLine(1, "CellI %d %d", cell.x,cell.y);
-  nxtDisplayTextLine(2, "CellOb %d %d", cellX,cellY);
 	short robotX = cell.x;
   short robotY = cell.y;
 
@@ -691,13 +746,8 @@ void go(int cellX, int cellY){
 					}
 				}
 			}
-
-      nxtDisplayTextLine(1, "ORI %2.2f %2.2f", origin.x,origin.y);
-  		nxtDisplayTextLine(2, "ACT %2.2f %2.2f", posX,posY);
-      nxtDisplayTextLine(3, "DEST %.2f %.2f", destination.x, destination.y);
 			//float w = (thetaFinal - theta)*10;
 			//w = w - 0.9;
-			nxtDisplayTextLine(5, "w: %.2f", w);
 			setSpeed(0.1,w,-1,-1);
       if(ygriega){
 				posX = destination.x;

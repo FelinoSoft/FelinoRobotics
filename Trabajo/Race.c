@@ -13,6 +13,7 @@
 #include "setSpeed.c"
 #include "odometry.c"
 #include "mapLib.c"
+#include "draw.c"
 #include "part1.c"
 #include "part2.c"
 #include "part3.c"
@@ -24,15 +25,10 @@ task main()
   HTGYROstartCal(HTGYRO);
 
   // Start tasks
-  set_position(robot_odometry, 1.4, 1, (PI/2));
+  set_position(robot_odometry, 1.4, 1.4, (PI/2));
   //set_position(robot_odometry, 0, 0.4, -(PI/2));
 
   StartTask(updateOdometry);
-  StartTask(controlSpeed);
-
-  // Move forward until position (0,0)
-  //moveForward();
-  //set_position(robot_odometry, 0, 0, -(PI/2));
 
   // Get kind of labyrinth
   B = SensorValue[lightSensor] < 35;
@@ -41,10 +37,13 @@ task main()
 
   // Lets do the eight bitches
   if(B){
+  	// Set initial position
+
   	//start loading map	B
   	StartTask(planPathOnTheRoadTask);
 
   	// Do trajectory
+  	set_position(robot_odometry, 2.2, 3, -(PI/2));
 		doHalfEightLeft();
 		//wait for map loaded and set position. Start part 2
 		while(!planned){
@@ -54,12 +53,21 @@ task main()
 		// Set position
 		cellToPos(iniPos, (X_START_B-1)/2, (Y_START_B-1)/2);
 		set_position(robot_odometry, iniPos.x, iniPos.y, -(PI/2));
+		drawMap();
 		doPlanning();
+		// Time to search balls
+		// Initialize the camera
+		setSpeed(0,0,-1,-1);
+		NXTCAMinit(cam);
+		camStarted = true;
+		startPart3();
 
 	} else {
 		//start loading map A
+
 		StartTask(planPathOnTheRoadTask);
-/*
+
+		set_position(robot_odometry, 0.6, 3, -(PI/2));
 		// Do trajectory
   	doHalfEightRight();
 
@@ -71,15 +79,19 @@ task main()
 		// Set position
 		cellToPos(iniPos, (X_START_A-1)/2, (Y_START_A-1)/2);
 		set_position(robot_odometry, iniPos.x, iniPos.y, -(PI/2));
+		drawMap();
 		doPlanning();
-*/
+
 		// Time to search balls
+		// Initialize the camera
+		setSpeed(0,0,-1,-1);
+		NXTCAMinit(cam);
+		camStarted = true;
 		startPart3();
   }
 
   // Stops tasks and closes file handlers
-  StopTask(controlSpeed);
   StopTask(updateOdometry);
 	Close(hFileHandleOd, nIoResultOd);
-	nxtDisplayTextLine(5, "FIN");
+	wait1Msec(100000);
 }
