@@ -30,7 +30,7 @@ float radToDeg(float rads)
 // Normalizes theta [-pi,pi]
 float normTheta(float theta)
 {
-    while (theta < 0) {
+    while (theta < -(2*(PI))) {
         theta = 2*(PI) + theta;
     }
 
@@ -40,6 +40,9 @@ float normTheta(float theta)
 
     if (theta > (PI)) {
         theta = theta - (2*(PI));
+    }
+    if (theta < -(PI)) {
+    	theta = theta + (2*(PI));
     }
 
     return theta;
