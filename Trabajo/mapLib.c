@@ -312,6 +312,7 @@ void calcWaveFront(Grid g, int x, int y, int value){
 	if(alVuelo){
   	wait1Msec(1);
   }
+
 	if(x >= 0 && y >= 0 && x < 2*sizeX+1 && y < 2*sizeY+1 && y < 8){
 		if(g.grid[x][y] != -1 && (g.grid[x][y] > value || g.grid[x][y] == -2)){
 
@@ -746,8 +747,9 @@ void go(int cellX, int cellY){
 					}
 				}
 			}
+
 			setSpeed(0.1,w,-1,-1);
-      if(ygriega){
+      		if(ygriega){
 				posX = destination.x;
 			} else{
 				posY = destination.y;

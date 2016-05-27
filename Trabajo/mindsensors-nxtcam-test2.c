@@ -69,6 +69,7 @@ task main () {
       nxtDrawRect(_l, _t, _r, _b);
 
     }
+
     NXTCAMgetAverageCenter(_blobs, 3, 0, _x, _y);
     _x = xscale(_x);
     _y = yscale(_y);
