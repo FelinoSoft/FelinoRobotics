@@ -1,3 +1,9 @@
+/*
+ *  part2.c
+ *  Includes functions to do the second part of the race:
+ *  the unknown labyrinth
+ */
+
 #define X_START_A  3
 #define Y_START_A  7
 #define X_START_B  11
@@ -7,12 +13,16 @@
 #define X_END_B 7
 #define Y_END_B 7
 
+/* Variables */
 bool planned = false;
 bool camStarted = false;
 bool doRecalibration = true;
 bool doDrawing = true;
 bool thetaRecalibrated = false;
 
+/*
+ *  Gets the average value of 5 sonar values
+ */
 float get5SonarValues()
 {
 	float value = SensorValue[sonarSensorFrontal];
@@ -23,6 +33,9 @@ float get5SonarValues()
 	return value/5;
 }
 
+/*
+ *  Recalibrates the robot theta by using a wall and the sonar
+ */
 task recalTheta()
 {
 	wait1Msec(100);
@@ -71,6 +84,10 @@ task recalTheta()
 	thetaRecalibrated = true;
 }
 
+/*
+ *  Executes the planning made with planPath avoiding the obstacles
+ *  detected
+ */
 void doPlanning()
 {
 	int x_end;
@@ -161,7 +178,9 @@ void doPlanning()
 	}
 }
 
-// Takes control of the speed
+/*
+ *  Does the planning for the labyrinth on a paralell task
+ */
 task planPathOnTheRoadTask()
 {
   // Common variables
