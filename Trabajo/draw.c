@@ -1,6 +1,13 @@
-bool doReDrawMap = false;
+/*
+ *  draw.c
+ *  Contains functions for drawing the map on the
+ *  NXT display
+ */
 
-// DRAW map for the first time
+ /*
+  *  Function to draw the map for the first time,
+  *  clearing the screen with each call
+  */
 void drawMap(){
   int i,j,cx,cy;
 
@@ -25,8 +32,6 @@ void drawMap(){
       }
     }
   }
-
-
   // check "horizontal" walls
   for (j=2; j<2*sizeY; j=j+2){
     for (i=1; i< 2*sizeX; i=i+2){
@@ -40,7 +45,9 @@ void drawMap(){
   }
 }
 
-// Draw map another time
+/*
+ *  Function to draw the map without clearing the screen with each call
+ */
 void reDrawMap(){
   int i,j,cx,cy;
 
