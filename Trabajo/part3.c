@@ -1,3 +1,9 @@
+/*
+ *  part3.c
+ *  Includes functions to do the third part of the race:
+ *  the catching red balls area
+ */
+
 // CONFIG camera color position
 #define BLUE 2
 #define GREEN 1
@@ -18,6 +24,7 @@
 #define X_CARDBOARD_B 0.6
 #define Y_CARDBOARD 3
 
+/* Variables */
 int areaMin = 100;
 int areaMed = 200;
 
@@ -26,25 +33,19 @@ int goalArea = 4500;
 int areaError = 500;
 float cameraCenter = 85;
 float centerError = 5;
-//bool esMiPrimeritaVezNoMas = true;
-
 bool finished = false;
 
+// Custom structs
 typedef struct
 {
 	float a;
 	float b;
 } Vec;
 
-//void center_object(int color);
-
-void carToPol(Vec dest, Vec p1, Vec p2){
-	dest.a = euclideanDistance(p1.a, p2.a, p1.b, p2.b);
-	dest.b = atan2(p2.a - p1.a, p2.b - p1.b);
-}
-
-// Devuelve la velocidad angular correspondiente al giro a realizar
-// para mantener la pelota centrada
+/*
+ * Returns the angular speed equivalent to the turn that the robot has to make
+ * to keep the ball centered
+ */
 float fw(int blob_center_x){
 	float d = cameraCenter - blob_center_x;
 	if(d >= 0){
@@ -56,6 +57,9 @@ float fw(int blob_center_x){
 	return w;
 }
 
+/*
+ *  Goes to the center of the room
+ */
 void goToCenter(){
 	float errorTheta = 0.005;
 
@@ -66,40 +70,6 @@ void goToCenter(){
 	y = robot_odometry.y;
 	theta = robot_odometry.th;
 	ReleaseMutex(semaphore_odometry);
-/*
-	// Obtain angle to turn
-	Vec robotVec;
-	robotVec.a = x;
-	robotVec.b = y;
-	Vec centerVec;
-	if(B){
-		centerVec.a = X_CENTER_B;
-	} else {
-		centerVec.a = X_CENTER_A;
-	}
-	centerVec.b = Y_CENTER;
-
-	Vec polarVec;
-	carToPol(polarVec, robotVec, centerVec);
-
-	if(thetaFinal > (PI/2)){
-			// Must go left
-			setSpeed(0, W_ROTACION, -1, -1);
-	} else {
-			// Must go right
-			setSpeed(0, -W_ROTACION, -1, -1);
-	}
-
-	while(abs(theta - thetaFinal) > errorTheta){
-			// Get info
-
-			// Position info
-			AcquireMutex(semaphore_odometry);
-			x = robot_odometry.x;
-			y = robot_odometry.y;
-			theta = robot_odometry.th;
-			ReleaseMutex(semaphore_odometry);
-	}*/
 	setSpeed(0,0,-1,-1);
 
 	// Go to center
@@ -118,6 +88,9 @@ void goToCenter(){
 		setSpeed(0,0,-1,-1);
 }
 
+/*
+ *  Searches the ball
+ */
 void search_ball(){
 
 		PlaySoundFile("Woops.rso");
@@ -141,8 +114,9 @@ void search_ball(){
 		}
 }
 
-/* El robot ha encontrado la pelota, pero tiene que girar hasta encontrarla
- en el centro de la camara */
+/*
+ *  Moves the robot to align its center to the ball center
+ */
 void center_ball(){
 	PlaySoundFile("wilhelmA.rso");
   int _nblobs;
@@ -187,9 +161,10 @@ void center_ball(){
 	}
 }
 
-
-// Devuelve la velocidad lineal correspondiente al seguimiento de la
-// pelota en funcion de la distancia entre el robot y la pelota
+/*
+ * Returns the lineal speed equivalent to the turn that the robot has to make
+ * to keep the ball centered
+ */
 float fv(int blob_area){
 
 	float dA = sqrt(goalArea) - sqrt(blob_area);
@@ -197,6 +172,9 @@ float fv(int blob_area){
 	return v;
 }
 
+/*
+ *  Goes after the ball found
+ */
 void track_ball(){
 		PlaySoundFile("WTF.rso");
 	  int _nblobs;
@@ -247,7 +225,9 @@ void track_ball(){
 		}
 }
 
-// Baja el brazo retractil para atrapar la pelota
+/*
+ *  Pulls down the arm to catch the ball
+ */
 void catch_ball()
 {
 	float armPower = 30;
@@ -271,7 +251,9 @@ void catch_ball()
 	releaseCPU();
 }
 
-// Comprueba si tiene la pelota atrapada bajo el brazo retractil
+/*
+ *  Check if it has the ball catched
+ */
 bool check_catched(){
 	bool catched = true;
 	bool red_found = false;
@@ -326,23 +308,11 @@ bool check_catched(){
 			  }
 		}
 		return catched;
-
-
-
-	/*
-			PlaySoundFile("WTF.rso");
-			hogCPU();
-			motor[motorB] = 30;
-			releaseCPU();
-			setSpeed(0,0,-1,-1);
-			Sleep(500);
-
-			hogCPU();
-			motor[motorB] = 0;
-			releaseCPU();
-			catched = false;*/
 }
 
+/*
+ *  Searches the nearest and the correct exit to finish the race
+ */
 void searchNearestExit(){
 
 	// Girar hasta estar orientados hacia arriba (PI/2)
@@ -565,6 +535,9 @@ void searchNearestExit(){
 	drawRobot(posX * 1000, posY * 1000, theta);
 }
 
+/*
+ *  Contains the main behaviour on part 3
+ */
 void startPart3(){
 	// Mientras no haya atrapado la pelota, el robot sigue
 	// buscandola, centrandola, siguiendola e intentando atraparla
@@ -576,14 +549,9 @@ void startPart3(){
 			center_ball();
 			track_ball();
 
-			/*
-			search_object(GOAL_COLOR);
-			//center_object(GOAL_COLOR);
-			track_object(GOAL_COLOR);*/
-
 			// Catch the ball
 			catch_ball();
-			catched = check_catched();/*check_catched(); TODO*/
+			catched = check_catched();
 		}
 		searchNearestExit();
 	}
