@@ -1,13 +1,21 @@
+/*
+ *  mutexLib.c
+ *  Contains functions for using semaphore variables and accessing stuff
+ *  in mutual exclusion
+ */
+
+// Custom type of variable
 typedef short TMutex;
 
-//TMutex test = 0;  // Important to initialize to zero. Not acquired.
-
+/*
+ *  Tries to acquire the mutex variable. If failes, retries giving other
+ *  threads time to acquire it
+ */
 void AcquireMutex(TMutex &nMutex)
 {
   while (true)
   {
     // Loop until mutex is obtained
-
    ++nMutex;
     if (nMutex == 1)
       return;  // Succeeded
@@ -18,6 +26,9 @@ void AcquireMutex(TMutex &nMutex)
   }
 }
 
+/*
+ *  Releases the mutex variable
+ */
 void ReleaseMutex(TMutex &nMutex)
 {
   --nMutex;

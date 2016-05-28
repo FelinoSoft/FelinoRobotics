@@ -62,12 +62,11 @@ Grid grid;
  *  Initializes the connections matrix
  */
 void initConnections(){
-     for(int i=0; i<2*MAX_X+1; ++i){
-        for (int j=0; j<2*MAX_Y+1; ++j){
-          connectionsMatrix[i][j]=false;
-        }
-     }
-
+   for(int i=0; i<2*MAX_X+1; ++i){
+      for (int j=0; j<2*MAX_Y+1; ++j){
+        connectionsMatrix[i][j]=false;
+      }
+   }
 }
 
 /*
