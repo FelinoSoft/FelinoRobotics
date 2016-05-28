@@ -17,7 +17,9 @@ float curW = 0;   // Current W speed
 float incV = 0;  // Value for modifying the current V speed
 float incW = 0;  // Value for modifying the current W speed
 
-// Sets speed to motors
+/*
+ *  Sets speed to motors
+ */
 int setSpeedBase(float v, float w)
 {
   // Start the motors so that the robot gets
@@ -62,7 +64,10 @@ int setSpeedBase(float v, float w)
   }
 }
 
-// Sets speed variables for automatic adjustement
+/*
+ * Sets speed variables for automatic adjustement
+ * DEPRECATED: Now it only calls setSpeedBase
+ */
 void setSpeed(float oV, float oW, float iV, float iW)
 { /*
   AcquireMutex(access_speed);
@@ -76,7 +81,7 @@ void setSpeed(float oV, float oW, float iV, float iW)
   setSpeedBase(oV, oW);
 }
 
-// Takes control of the speed
+// Takes control of the speed. DEPRECATED
 /*
 task controlSpeed()
 {
