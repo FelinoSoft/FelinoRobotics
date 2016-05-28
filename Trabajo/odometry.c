@@ -10,7 +10,9 @@ TFileIOResult nIoResultOd;
 TFileHandle hFileHandleOd;
 long nFileSizeOd = 10000; 			//1 byte each char...
 
-// Updates the odometry (INITIALIZE robot_odometry BEFORE USING IT)
+/*
+ *  Updates the odometry (INITIALIZE robot_odometry BEFORE USING IT)
+ */
 task updateOdometry(){
 
   float cycle = 0.01; 								// we want to update odometry every 0.01 s
