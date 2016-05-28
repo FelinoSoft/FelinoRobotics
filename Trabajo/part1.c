@@ -1,9 +1,8 @@
 /*
-void doHalfEightRight();
-void doHalfEightLeft();
-void doHalfEightStraightRight();
-void doHalfEightStraightLeft();
-*/
+ *  part1.c
+ *  Includes functions to do the first part of the race:
+ *  the half eight trajectory
+ */
 
 #define W_ROTACION 0.8
 #define V_RECTA 0.2
@@ -24,30 +23,9 @@ void doHalfEightStraightLeft();
 
 bool B = false;	// By default, labyrinth A
 
-void moveForward()
-{
-	// Destination variables
-	float y, yFinal;
-	float errorDist = 0.005;
-
-	AcquireMutex(semaphore_odometry);
-	y = robot_odometry.y;
-	ReleaseMutex(semaphore_odometry);
-	yFinal = 0;
-	// Move
-	setSpeed((2*V_RECTA)/3,0,-1,-1);
-
-	while(euclideanDistance(0,0,y,yFinal) > errorDist + 0.005){
-		AcquireMutex(semaphore_odometry);
-		y = robot_odometry.y;
-		ReleaseMutex(semaphore_odometry);
-	}
-
-	// Staph
-	setSpeed(0,0,-1,-1);
-}
-
-
+/*
+ *  Does the half eight starting on A
+ */
 void doHalfEightRight()
 {
   // Destination variables
@@ -78,30 +56,8 @@ void doHalfEightRight()
   // generate 1st part of trayectory
 	v = V_GIRO; //+ V_GIRO/(10);
   w = W_GIRO;// + W_GIRO/(10);
-  setSpeed(v,w,
-					 -1,
-					 -1);
-	Sleep(6350);/*
-	xFinal = 0;
-	yFinal = 0.8;
-	thetaFinal = 0.017;
-	AcquireMutex(semaphore_odometry);
-	theta = robot_odometry.th;
-	ReleaseMutex(semaphore_odometry);
-	/*
-	while( /*euclideanDistance(x,xFinal,y,yFinal) > errorDist &&*/
-	/*			 abs(theta - thetaFinal) > errorTheta) {
-		AcquireMutex(semaphore_odometry);
-		x = robot_odometry.x;
-		y = robot_odometry.y;
-		theta = robot_odometry.th;
-		ReleaseMutex(semaphore_odometry);
-	}
-	if(euclideanDistance(x,xFinal,y,yFinal) > errorDist){
-		PlaySoundFile("Woops.rso");
-	} else {
-		PlaySoundFile("wilhelmA.rso");
-	}*/
+  setSpeed(v,w, -1, -1);
+	Sleep(6350);
 
   // generate 2nd part of trayecto
 	v = V_GIRO; //+ V_GIRO/(9.5);
@@ -109,23 +65,7 @@ void doHalfEightRight()
 	setSpeed(v,-w,
 					-1,
 					-1);
-	Sleep(6150);/*
-	xFinal = 0;
-	yFinal = 1.6;
-	thetaFinal = -(PI);
-	while( /*euclideanDistance(x,xFinal,y,yFinal) > errorDist &&*/
-				 /*abs(theta - thetaFinal) > errorTheta) {
-		AcquireMutex(semaphore_odometry);
-		x = robot_odometry.x;
-		y = robot_odometry.y;
-		theta = robot_odometry.th;
-		ReleaseMutex(semaphore_odometry);
-		if(theta > (PI/2)){
-			theta = theta - (2*PI);
-		}
-	}
-	PlaySoundFile("Woops.rso");
-	*/
+	Sleep(6150);
 	AcquireMutex(semaphore_odometry);
 	x = robot_odometry.x;
 	y = robot_odometry.y;
@@ -155,9 +95,8 @@ void doHalfEightRight()
 }
 
 /*
- * Half eight to the Left
+ *  Does the half eight starting on B
  */
-
 void doHalfEightLeft()
 {
   // Destination variables
@@ -193,22 +132,6 @@ void doHalfEightLeft()
 					 -1,
 					 -1);
 	Sleep(6250);
-	/*
-	xFinal = 0;
-	yFinal = 0.8;
-	thetaFinal = -(PI);
-	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist &&
-				 abs(theta - thetaFinal) > errorTheta) {
-		AcquireMutex(semaphore_odometry);
-		x = robot_odometry.x;
-		y = robot_odometry.y;
-		theta = robot_odometry.th;
-		ReleaseMutex(semaphore_odometry);
-		if(theta > (PI/2)){
-			theta = theta - (2*PI);
-		}
-	}
-	*/
 	PlaySoundFile("Woops.rso");
 
   // generate 2nd part of trayecto
@@ -218,22 +141,6 @@ void doHalfEightLeft()
 					-1,
 					-1);
 	Sleep(6250);
-					/*
-	xFinal = 0;
-	yFinal = 1.6;
-	thetaFinal = 0;
-	AcquireMutex(semaphore_odometry);
-	theta = robot_odometry.th;
-	ReleaseMutex(semaphore_odometry);
-	while( euclideanDistance(x,xFinal,y,yFinal) > errorDist &&
-				 abs(theta - thetaFinal) > errorTheta) {
-		AcquireMutex(semaphore_odometry);
-		x = robot_odometry.x;
-		y = robot_odometry.y;
-		theta = robot_odometry.th;
-		ReleaseMutex(semaphore_odometry);
-	}
-	*/
 	PlaySoundFile("Woops.rso");
 
 	// turn 90 degrees on the robot

@@ -4,7 +4,6 @@
  *  Manages odometry of the robot
  */
 
-
 // Odometry file
 TFileIOResult nIoResultOd;
 TFileHandle hFileHandleOd;
