@@ -16,18 +16,25 @@ TMutex semaphore_odometry = 0;  // Important to initialize to zero!!! Not acquir
 
 /* Common functions */
 
-// Converts degrees to radians
+/*
+ *  Converts degrees to radians
+ */
 float degToRad(float degrees)
 {
     return (degrees * (PI)) /180;
 }
 
+/*
+ *  Converts radians to degrees
+ */
 float radToDeg(float rads)
 {
 		return ((rads * 180)) / (PI);
 }
 
-// Normalizes theta [-pi,pi]
+/*
+ *  Normalizes theta [pi,-pi]
+ */
 float normTheta(float theta)
 {
     while (theta < -(2*(PI))) {
@@ -48,6 +55,9 @@ float normTheta(float theta)
     return theta;
 }
 
+/*
+ *  Returns the euclidean distance betweetn two points
+ */
 float euclideanDistance(float x1, float x2, float y1, float y2){
     return sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
 }
